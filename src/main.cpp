@@ -2,6 +2,7 @@
 #include "g-systemctl/platform/platform.hpp"
 #include <iostream>
 #include <cstring>
+#include <unistd.h>
 
 void print_help()
 {
@@ -23,7 +24,7 @@ void print_version()
 
 int main(int argc, char *argv[])
 {
-    bool system_mode = false;
+    bool system_mode = (geteuid() == 0);
     std::string initial_filter;
 
     for (int i = 1; i < argc; ++i)
