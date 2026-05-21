@@ -34,11 +34,13 @@ namespace gsystemctl::ui
         std::vector<ftxui::Box> item_boxes_;
         std::vector<ftxui::Box> toggle_button_boxes_;
         std::vector<ftxui::Box> log_button_boxes_;
+        std::vector<ftxui::Box> history_button_boxes_;
 
         void refresh_services();
         void apply_filter();
         void toggle_selected_service();
         void open_logs_for_selected_service();
+        void open_history_for_selected_service();
         ftxui::Component create_main_component();
         ftxui::Element render();
         ftxui::Element render_service_list();

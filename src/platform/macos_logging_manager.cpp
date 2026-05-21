@@ -10,4 +10,9 @@ std::pair<bool, std::string> MacOSLoggingManager::open_logs(
     return {false, "Logging manager is not supported on macOS"};
 }
 
+std::pair<bool, std::string> MacOSLoggingManager::open_log_history(
+    const std::string& /*unit*/) {
+    return {false, "Logging manager is not supported on macOS"};
+}
+
 } // namespace gsystemctl

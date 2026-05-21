@@ -18,6 +18,9 @@ public:
     /// information in case of failure.
     virtual std::pair<bool, std::string> open_logs(const std::string& unit) = 0;
 
+    /// Open a full log history viewer for the given unit from current boot.
+    virtual std::pair<bool, std::string> open_log_history(const std::string& unit) = 0;
+
     static std::unique_ptr<LoggingManager> create(
         std::shared_ptr<CommandExecutor> executor);
 };

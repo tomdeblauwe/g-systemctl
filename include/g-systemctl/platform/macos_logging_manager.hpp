@@ -10,6 +10,7 @@ public:
     explicit MacOSLoggingManager(std::shared_ptr<CommandExecutor> executor);
 
     std::pair<bool, std::string> open_logs(const std::string& unit) override;
+    std::pair<bool, std::string> open_log_history(const std::string& unit) override;
 
 private:
     std::shared_ptr<CommandExecutor> executor_;

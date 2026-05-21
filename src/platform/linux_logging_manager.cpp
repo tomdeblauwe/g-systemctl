@@ -15,10 +15,37 @@ std::pair<bool, std::string> LinuxLoggingManager::open_logs(
         return {false, "Not running inside a tmux session"};
     }
 
-    // Build the journalctl command. Quote the unit name to avoid shell issues.
-    std::string command = "tmux split-window -v 'journalctl -u " + unit + " -f'";
+    // Build the journalctl command piped through tl for a nice TUI viewer.
+    std::string command = "tmux split-window -v 'journalctl -f -n 100 -u " + unit + " | tl'";
     if (!executor_) {
-        // If we don't have an executor, just run the command directly via system().
+        int rc = std::system(command.c_str());
+        if (rc != 0) {
+            return {false, "failed to execute tmux command"};
+        }
+        return {true, ""};
+    }
+
+    auto result = executor_->execute(command);
+    if (result.exit_code != 0) {
+        std::string msg = "tmux command failed";
+        if (!result.stderr_output.empty()) {
+            msg = result.stderr_output;
+        }
+        return {false, msg};
+    }
+    return {true, ""};
+}
+
+std::pair<bool, std::string> LinuxLoggingManager::open_log_history(
+    const std::string& unit) {
+    const char* tmux_env = std::getenv("TMUX");
+    if (!tmux_env) {
+        return {false, "Not running inside a tmux session"};
+    }
+
+    // Show all logs from the current boot for this unit via tl.
+    std::string command = "tmux split-window -v 'journalctl -b 0 -u " + unit + " | tl'";
+    if (!executor_) {
         int rc = std::system(command.c_str());
         if (rc != 0) {
             return {false, "failed to execute tmux command"};

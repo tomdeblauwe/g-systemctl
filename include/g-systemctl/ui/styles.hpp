@@ -18,6 +18,6 @@ namespace gsystemctl::ui
 
     ftxui::Element service_card(const std::string &name, const std::string &status,
                                 const std::string &description, bool is_running, bool selected,
-                                ftxui::Box &toggle_box, ftxui::Box &log_box);
+                                ftxui::Box &toggle_box, ftxui::Box &log_box, ftxui::Box &history_box);
 
 } // namespace gsystemctl::ui

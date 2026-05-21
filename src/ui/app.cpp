@@ -125,6 +125,32 @@ namespace gsystemctl::ui
         }
     }
 
+    void App::open_history_for_selected_service()
+    {
+        if (filtered_services_.empty() || selected_index_ < 0 ||
+            selected_index_ >= static_cast<int>(filtered_services_.size()))
+        {
+            return;
+        }
+
+        const auto &service = filtered_services_[selected_index_];
+        status_message_ = "Opening log history for " + service.unit + "...";
+        screen_.PostEvent(Event::Custom);
+
+        if (logging_manager_)
+        {
+            auto [success, message] = logging_manager_->open_log_history(service.unit);
+            if (!success)
+            {
+                error_message_ = "Unable to open log history: " + message;
+            }
+        }
+        else
+        {
+            error_message_ = "No logging manager available";
+        }
+    }
+
     Component App::create_main_component()
     {
         auto input = Input(&filter_text_, "Filter services...");
@@ -168,6 +194,10 @@ namespace gsystemctl::ui
         }
         if (event == Event::Special("\x1bl")) {
             open_logs_for_selected_service();
+            return true;
+        }
+        if (event == Event::Special("\x1bh")) {
+            open_history_for_selected_service();
             return true;
         }
         if (event.is_character()) {
@@ -214,6 +244,13 @@ namespace gsystemctl::ui
                     if (log_button_boxes_[i].Contain(mouse.x, mouse.y)) {
                         selected_index_ = static_cast<int>(i);
                         open_logs_for_selected_service();
+                        return true;
+                    }
+                }
+                for (size_t i = 0; i < history_button_boxes_.size(); ++i) {
+                    if (history_button_boxes_[i].Contain(mouse.x, mouse.y)) {
+                        selected_index_ = static_cast<int>(i);
+                        open_history_for_selected_service();
                         return true;
                     }
                 }
@@ -273,13 +310,15 @@ namespace gsystemctl::ui
         item_boxes_.resize(filtered_services_.size());
         toggle_button_boxes_.resize(filtered_services_.size());
         log_button_boxes_.resize(filtered_services_.size());
+        history_button_boxes_.resize(filtered_services_.size());
         for (size_t i = 0; i < filtered_services_.size(); ++i)
         {
             const auto &svc = filtered_services_[i];
             bool selected = (static_cast<int>(i) == selected_index_);
             auto card = service_card(svc.unit, svc.sub, svc.description,
                                      svc.is_running(), selected,
-                                     toggle_button_boxes_[i], log_button_boxes_[i]);
+                                     toggle_button_boxes_[i], log_button_boxes_[i],
+                                     history_button_boxes_[i]);
             if (selected)
             {
                 card = card | focus;
@@ -315,6 +354,7 @@ namespace gsystemctl::ui
                    text("  Alt+r        - Refresh service list"),
                    text("  ?            - Toggle this help screen"),
                    text("  Alt+l        - Open logs for selected unit (tmux only)"),
+                   text("  Alt+h        - Open log history for selected unit (tmux only)"),
                    text("  Alt+q / Esc  - Quit"),
                    text(""),
                    text("Filtering:") | bold,
