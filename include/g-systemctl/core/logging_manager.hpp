@@ -18,7 +18,8 @@ public:
     /// information in case of failure.
     virtual std::pair<bool, std::string> open_logs(const std::string& unit) = 0;
 
-    /// Open a full log history viewer for the given unit from current boot.
+    /// Open a log history viewer for the given unit from current boot, limited
+    /// to the most recent 10000 lines.
     virtual std::pair<bool, std::string> open_log_history(const std::string& unit) = 0;
 
     static std::unique_ptr<LoggingManager> create(

@@ -43,8 +43,9 @@ std::pair<bool, std::string> LinuxLoggingManager::open_log_history(
         return {false, "Not running inside a tmux session"};
     }
 
-    // Show all logs from the current boot for this unit via tl.
-    std::string command = "tmux split-window -v 'journalctl -o short-precise --no-hostname -b 0 -u " + unit + " | tl'";
+    // Show the logs from the current boot for this unit via tl, capped so a
+    // chatty unit doesn't pin a core formatting hundreds of thousands of lines.
+    std::string command = "tmux split-window -v 'journalctl -o short-precise --no-hostname -b 0 -n 10000 -u " + unit + " | tl'";
     if (!executor_) {
         int rc = std::system(command.c_str());
         if (rc != 0) {
